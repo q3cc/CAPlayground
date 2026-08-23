@@ -115,6 +115,8 @@ async function startWebServer() {
 }
 
 function installApplicationMenu() {
+  const zh = app.getLocale().toLowerCase().startsWith("zh")
+  const label = (english, chinese) => zh ? chinese : english
   const template = [
     ...(process.platform === "darwin"
       ? [{
@@ -132,9 +134,38 @@ function installApplicationMenu() {
           ],
         }]
       : []),
-    { label: "Edit", submenu: [{ role: "undo" }, { role: "redo" }, { type: "separator" }, { role: "cut" }, { role: "copy" }, { role: "paste" }, { role: "selectAll" }] },
-    { label: "View", submenu: [{ role: "reload" }, { role: "forceReload" }, { type: "separator" }, { role: "resetZoom" }, { role: "zoomIn" }, { role: "zoomOut" }, { type: "separator" }, { role: "togglefullscreen" }] },
-    { label: "Window", submenu: [{ role: "minimize" }, { role: "close" }] },
+    {
+      label: label("Edit", "编辑"),
+      submenu: [
+        { role: "undo", label: label("Undo", "撤销") },
+        { role: "redo", label: label("Redo", "重做") },
+        { type: "separator" },
+        { role: "cut", label: label("Cut", "剪切") },
+        { role: "copy", label: label("Copy", "复制") },
+        { role: "paste", label: label("Paste", "粘贴") },
+        { role: "selectAll", label: label("Select All", "全选") },
+      ],
+    },
+    {
+      label: label("View", "视图"),
+      submenu: [
+        { role: "reload", label: label("Reload", "重新加载") },
+        { role: "forceReload", label: label("Force Reload", "强制重新加载") },
+        { type: "separator" },
+        { role: "resetZoom", label: label("Actual Size", "实际大小") },
+        { role: "zoomIn", label: label("Zoom In", "放大") },
+        { role: "zoomOut", label: label("Zoom Out", "缩小") },
+        { type: "separator" },
+        { role: "togglefullscreen", label: label("Toggle Full Screen", "切换全屏") },
+      ],
+    },
+    {
+      label: label("Window", "窗口"),
+      submenu: [
+        { role: "minimize", label: label("Minimize", "最小化") },
+        { role: "close", label: label("Close", "关闭") },
+      ],
+    },
   ]
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }

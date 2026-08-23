@@ -41,6 +41,9 @@ jobs:
       - name: Install desktop dependencies
         working-directory: apps/desktop
         run: npm ci
+      - name: Audit i18n coverage
+        working-directory: apps/web
+        run: npm run i18n:audit:strict
       - name: Build desktop packages
         working-directory: apps/desktop
         run: npm run ${{ matrix.command }}

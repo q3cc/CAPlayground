@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react"
 import { useRouter } from "next/navigation"
+import { LegacyI18nBridge } from "@/components/legacy-i18n-bridge"
 import {
   localeCookieName,
   localeStorageKey,
@@ -65,7 +66,12 @@ export function I18nProvider({
     [applyLocale, locale],
   )
 
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
+  return (
+    <I18nContext.Provider value={value}>
+      {children}
+      <LegacyI18nBridge locale={locale} />
+    </I18nContext.Provider>
+  )
 }
 
 export function useI18n() {
