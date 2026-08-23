@@ -1,0 +1,53 @@
+name: Publish v1.0.0
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/publish-v1.0.0.yml"
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download verified Windows artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 32622410258 --repo q3cc/CAPlayground --name CAPlayground-Windows --dir release
+      - name: Download verified macOS artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download 32622410258 --repo q3cc/CAPlayground --name CAPlayground-macOS --dir release
+      - name: Create checksums
+        working-directory: release
+        run: sha256sum * > SHA256SUMS.txt
+      - name: Write release notes
+        run: |
+          cat > RELEASE_NOTES.md <<'EOF'
+          CAPlayground v1.0.0 是本分支首个正式桌面发行版。
+
+          ### 主要更新
+
+          - 完成简体中文与英文双语支持，并自动跟随系统语言。
+          - 深度覆盖账户、登录、控制台、项目、壁纸库、路线图、隐私政策、服务条款和编辑器各属性面板。
+          - 新增严格国际化审计，本次发行未发现未覆盖的用户可见英文候选。
+          - 提供 Windows x64 安装版与便携版。
+          - 提供 macOS Intel（x64）与 Apple Silicon（arm64）的 DMG 和 ZIP。
+          - 中文 README 作为项目入口，原英文 README 完整保留在 README_EN.md。
+
+          ### 安装提示
+
+          当前安装包未进行商业代码签名，Windows SmartScreen 或 macOS Gatekeeper 可能显示安全提示。请仅从本 Release 页面下载。
+
+          ### 校验
+
+          所有文件的 SHA-256 值见 SHA256SUMS.txt。
+          EOF
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create v1.0.0 release/* --repo q3cc/CAPlayground --target b50cb52d1c7b12c479157dc0020a6d3867d5c60b --title "CAPlayground v1.0.0" --notes-file RELEASE_NOTES.md
