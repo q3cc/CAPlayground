@@ -60,6 +60,44 @@ When these are missing:
 bun run build && bun run start
 ```
 
+## Internationalization
+
+CAPlayground currently ships in English and Simplified Chinese. The first visit follows the operating-system language; users can switch languages from the main navigation or **Editor Settings → Language**. The choice is saved for later sessions.
+
+Translation messages live in `apps/web/lib/i18n/messages`. Add new user-facing copy to the English catalog first, then provide the same typed key in every other locale.
+
+## Desktop clients
+
+The Electron client bundles the Next.js standalone server, so dynamic editor routes and API handlers continue to work without loading the hosted CAPlayground website.
+
+### Development
+
+Install dependencies in both apps, then launch the desktop client:
+
+```bash
+cd apps/web && npm install
+cd ../desktop && npm install
+npm run dev
+```
+
+### Windows packages
+
+```bash
+cd apps/desktop
+npm run dist:win
+```
+
+This creates an NSIS installer and a portable x64 executable in `apps/desktop/dist`.
+
+### macOS packages
+
+```bash
+cd apps/desktop
+npm run dist:mac
+```
+
+This creates DMG and ZIP packages for Intel and Apple Silicon. macOS packages must be built on macOS. The `Desktop Builds` GitHub Actions workflow builds both Windows and macOS artifacts on their native runners and can also be started manually.
+
 ## Contributing
 
 Read [CONTRIBUTING.md](.github/CONTRIBUTING.md)

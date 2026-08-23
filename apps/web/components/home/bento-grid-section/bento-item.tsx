@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/components/i18n-provider"
 
 export interface LayerItem {
     id: string
@@ -20,6 +21,7 @@ interface BentoItemProps {
 }
 
 export function BentoItem({ item, renderLayer, onExampleClick, className }: BentoItemProps) {
+    const { t } = useI18n()
     const [isHovered, setIsHovered] = useState(false)
 
     return (
@@ -61,7 +63,7 @@ export function BentoItem({ item, renderLayer, onExampleClick, className }: Bent
                                     onExampleClick()
                                 }}
                             >
-                                Example Wallpaper
+                                {t("home.layers.example")}
                             </Button>
                         </div>
                     )}

@@ -59,6 +59,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getAnchor } from "@/components/editor/canvas-preview/utils/coordinates";
+import { useI18n } from "@/components/i18n-provider";
 
 interface Project { id: string; name: string; createdAt: string; width?: number; height?: number }
 
@@ -271,6 +272,7 @@ const ProjectThumb = React.memo(function ProjectThumb({
 });
 
 function ProjectsContent() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const [projects, setProjects] = useState<Project[]>([]);
   const [storageFallback, setStorageFallback] = useState<boolean>(false);
@@ -1679,31 +1681,31 @@ function ProjectsContent() {
             <div className="mb-2">
               <Link href="/">
                 <Button variant="ghost" size="sm" className="h-8 px-2">
-                  <ArrowLeft className="h-4 w-4 mr-1" /> Back
+                  <ArrowLeft className="h-4 w-4 mr-1" /> {t("common.back")}
                 </Button>
               </Link>
             </div>
             <div className="flex items-center gap-2">
-              <h1 className="font-sfpro text-3xl md:text-4xl font-bold">Your Projects</h1>
+              <h1 className="font-sfpro text-3xl md:text-4xl font-bold">{t("projects.title")}</h1>
               {loadingCloud && (
                 <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1">
                   <span className="inline-block h-3 w-3 border-2 border-t-transparent border-blue-800 rounded-full animate-spin" />
-                  Loading cloud...
+                  {t("projects.loadingCloud")}
                 </span>
               )}
               {storageFallback && (
                 <span className="text-[10px] md:text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
-                  Storage: IndexedDB fallback
+                  {t("projects.storageFallback")}
                 </span>
               )}
             </div>
-            <p className="text-muted-foreground">Create and manage your CoreAnimation projects stored locally on your device.</p>
+            <p className="text-muted-foreground">{t("projects.description")}</p>
             {/* Search & filters */}
             <div className="mt-4 flex gap-2 items-center">
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search projects by name..."
+                placeholder={t("projects.search")}
                 className="max-w-md"
               />
               <div className="border rounded-md p-0.5 flex">
@@ -1712,7 +1714,7 @@ function ProjectsContent() {
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => setViewMode("grid")}
-                  title="Grid view"
+                  title={t("projects.gridView")}
                 >
                   <Grid3x3 className="h-4 w-4" />
                 </Button>
@@ -1721,7 +1723,7 @@ function ProjectsContent() {
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => setViewMode("list")}
-                  title="List view"
+                  title={t("projects.listView")}
                 >
                   <List className="h-4 w-4" />
                 </Button>
@@ -1733,14 +1735,14 @@ function ProjectsContent() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>Time Period</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t("projects.filter.time")}</DropdownMenuLabel>
                   <DropdownMenuItem
                     onClick={() => setDateFilter("all")}
                     className={dateFilter === "all" ? "bg-accent" : ""}
                   >
                     {dateFilter === "all" && <Check className="h-4 w-4 mr-2" />}
                     {dateFilter !== "all" && <span className="w-4 mr-2" />}
-                    All time
+                    {t("projects.filter.allTime")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setDateFilter("7")}
@@ -1748,7 +1750,7 @@ function ProjectsContent() {
                   >
                     {dateFilter === "7" && <Check className="h-4 w-4 mr-2" />}
                     {dateFilter !== "7" && <span className="w-4 mr-2" />}
-                    Last 7 days
+                    {t("projects.filter.last7")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setDateFilter("30")}
@@ -1756,7 +1758,7 @@ function ProjectsContent() {
                   >
                     {dateFilter === "30" && <Check className="h-4 w-4 mr-2" />}
                     {dateFilter !== "30" && <span className="w-4 mr-2" />}
-                    Last 30 days
+                    {t("projects.filter.last30")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setDateFilter("year")}
@@ -1764,17 +1766,17 @@ function ProjectsContent() {
                   >
                     {dateFilter === "year" && <Check className="h-4 w-4 mr-2" />}
                     {dateFilter !== "year" && <span className="w-4 mr-2" />}
-                    This year
+                    {t("projects.filter.year")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Storage Location</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t("projects.filter.location")}</DropdownMenuLabel>
                   <DropdownMenuItem
                     onClick={() => setLocationFilter("all")}
                     className={locationFilter === "all" ? "bg-accent" : ""}
                   >
                     {locationFilter === "all" && <Check className="h-4 w-4 mr-2" />}
                     {locationFilter !== "all" && <span className="w-4 mr-2" />}
-                    All locations
+                    {t("projects.filter.allLocations")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setLocationFilter("device")}
@@ -1782,7 +1784,7 @@ function ProjectsContent() {
                   >
                     {locationFilter === "device" && <Check className="h-4 w-4 mr-2" />}
                     {locationFilter !== "device" && <span className="w-4 mr-2" />}
-                    Device only
+                    {t("projects.filter.device")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setLocationFilter("cloud")}
@@ -1790,7 +1792,7 @@ function ProjectsContent() {
                   >
                     {locationFilter === "cloud" && <Check className="h-4 w-4 mr-2" />}
                     {locationFilter !== "cloud" && <span className="w-4 mr-2" />}
-                    Cloud only
+                    {t("projects.filter.cloud")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setLocationFilter("both")}
@@ -1798,17 +1800,17 @@ function ProjectsContent() {
                   >
                     {locationFilter === "both" && <Check className="h-4 w-4 mr-2" />}
                     {locationFilter !== "both" && <span className="w-4 mr-2" />}
-                    Device and Cloud
+                    {t("projects.filter.both")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t("projects.filter.sort")}</DropdownMenuLabel>
                   <DropdownMenuItem
                     onClick={() => setSortBy("recent")}
                     className={sortBy === "recent" ? "bg-accent" : ""}
                   >
                     {sortBy === "recent" && <Check className="h-4 w-4 mr-2" />}
                     {sortBy !== "recent" && <span className="w-4 mr-2" />}
-                    Newest first
+                    {t("projects.filter.newest")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setSortBy("oldest")}
@@ -1816,7 +1818,7 @@ function ProjectsContent() {
                   >
                     {sortBy === "oldest" && <Check className="h-4 w-4 mr-2" />}
                     {sortBy !== "oldest" && <span className="w-4 mr-2" />}
-                    Oldest first
+                    {t("projects.filter.oldest")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setSortBy("name-asc")}
@@ -1824,7 +1826,7 @@ function ProjectsContent() {
                   >
                     {sortBy === "name-asc" && <Check className="h-4 w-4 mr-2" />}
                     {sortBy !== "name-asc" && <span className="w-4 mr-2" />}
-                    Name A → Z
+                    {t("projects.filter.nameAsc")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setSortBy("name-desc")}
@@ -1832,7 +1834,7 @@ function ProjectsContent() {
                   >
                     {sortBy === "name-desc" && <Check className="h-4 w-4 mr-2" />}
                     {sortBy !== "name-desc" && <span className="w-4 mr-2" />}
-                    Name Z → A
+                    {t("projects.filter.nameDesc")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1840,7 +1842,7 @@ function ProjectsContent() {
           </div>
           <div className="w-full md:w-auto flex gap-2">
             <Button variant={isSelectMode ? "secondary" : "outline"} onClick={toggleSelectMode}>
-              {isSelectMode ? "Done" : "Select"}
+              {isSelectMode ? t("common.done") : t("projects.select")}
             </Button>
             <input
               ref={importInputRef}
@@ -1859,10 +1861,10 @@ function ProjectsContent() {
             {!isSelectMode && (
               <>
                 <Button variant="outline" onClick={handleImportClick}>
-                  <Upload className="h-4 w-4 mr-2" /> Import
+                  <Upload className="h-4 w-4 mr-2" /> {t("projects.import")}
                 </Button>
                 <Button onClick={() => setIsCreateOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" /> New Project
+                  <Plus className="h-4 w-4 mr-2" /> {t("projects.new")}
                 </Button>
               </>
             )}
@@ -1873,14 +1875,14 @@ function ProjectsContent() {
                   onClick={openBulkDelete}
                   disabled={selectedIds.length === 0}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" /> Delete ({selectedIds.length})
+                  <Trash2 className="h-4 w-4 mr-2" /> {t("projects.deleteCount", { count: selectedIds.length })}
                 </Button>
                 <Button
                   onClick={handleUploadToDrive}
                   disabled={selectedIds.length === 0}
                   variant="outline"
                 >
-                  <Cloud className="h-4 w-4 mr-2" /> Sync to Cloud ({selectedIds.length})
+                  <Cloud className="h-4 w-4 mr-2" /> {t("projects.syncCount", { count: selectedIds.length })}
                 </Button>
               </>
             )}
@@ -1891,17 +1893,17 @@ function ProjectsContent() {
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Project</DialogTitle>
+              <DialogTitle>{t("projects.create.title")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="project-name">Project name</label>
+                <label className="text-sm font-medium" htmlFor="project-name">{t("projects.create.name")}</label>
                 <Input
                   id="project-name"
                   value={newProjectName}
                   onChange={(e) => setNewProjectName(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  placeholder="New Wallpaper"
+                  placeholder={t("projects.create.defaultName")}
                   autoFocus
                 />
               </div>
@@ -1913,7 +1915,7 @@ function ProjectsContent() {
                   onCheckedChange={(checked) => setUseDeviceSelector(!!checked)}
                 />
                 <Label htmlFor="device-selector" className="text-sm font-medium cursor-pointer">
-                  Set bounds by device
+                  {t("projects.create.deviceBounds")}
                 </Label>
               </div>
               
@@ -1924,16 +1926,16 @@ function ProjectsContent() {
                   onCheckedChange={(checked) => setGyroEnabled(!!checked)}
                 />
                 <Label htmlFor="gyro-enabled" className="text-sm font-medium cursor-pointer">
-                  [BETA] Enable Gyro (Parallax Effect)
+                  {t("projects.create.gyro")}
                 </Label>
               </div>
               
               {useDeviceSelector ? (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="device-select">Device</label>
+                  <label className="text-sm font-medium" htmlFor="device-select">{t("projects.create.device")}</label>
                   <Select value={selectedDevice} onValueChange={setSelectedDevice}>
                     <SelectTrigger id="device-select">
-                      <SelectValue placeholder="Select a device" />
+                      <SelectValue placeholder={t("projects.create.selectDevice")} />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">iPhone</div>
@@ -1956,12 +1958,12 @@ function ProjectsContent() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">390 × 844 is the most compatible and default for iPhones.</p>
+                  <p className="text-xs text-muted-foreground">{t("projects.create.deviceHint")}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="root-width">Width (px)</label>
+                    <label className="text-sm font-medium" htmlFor="root-width">{t("projects.create.width")}</label>
                     <Input
                       id="root-width"
                       type="number"
@@ -1972,7 +1974,7 @@ function ProjectsContent() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium" htmlFor="root-height">Height (px)</label>
+                    <label className="text-sm font-medium" htmlFor="root-height">{t("projects.create.height")}</label>
                     <Input
                       id="root-height"
                       type="number"
@@ -1986,12 +1988,12 @@ function ProjectsContent() {
               )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>{t("common.cancel")}</Button>
               <Button
                 onClick={createProjectFromDialog}
                 disabled={!newProjectName.trim() || (!useDeviceSelector && (!Number.isFinite(rootWidth) || !Number.isFinite(rootHeight) || rootWidth <= 0 || rootHeight <= 0))}
               >
-                Create
+                {t("projects.create.action")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2001,23 +2003,25 @@ function ProjectsContent() {
         }
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">
-            Your Projects ({filteredProjects.length}
-            {query || dateFilter !== "all" ? ` of ${projectsArray.length}` : ""})
+            {query || dateFilter !== "all"
+              ? t("projects.countFiltered", { visible: filteredProjects.length, total: projectsArray.length })
+              : t("projects.count", { count: filteredProjects.length })}
           </h2>
           
           {projectsArray.length === 0 ? (
             <div className="text-center py-12">
               <Folder className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No projects yet. Create your first project to get started!</p>
+              <p className="font-medium">{t("projects.empty.title")}</p>
+              <p className="text-muted-foreground mt-1">{t("projects.empty.description")}</p>
             </div>
           ) : filteredProjects.length === 0 ? (
             <div className="text-center py-12">
               <Folder className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No projects match your search/filter.</p>
+              <p className="text-muted-foreground">{t("projects.empty.noMatch")}</p>
               {(query || dateFilter !== "all") && (
                 <div className="mt-4 flex justify-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setQuery("")}>Clear search</Button>
-                  <Button variant="outline" size="sm" onClick={() => setDateFilter("all")}>Reset date</Button>
+                  <Button variant="outline" size="sm" onClick={() => setQuery("")}>{t("projects.empty.clearSearch")}</Button>
+                  <Button variant="outline" size="sm" onClick={() => setDateFilter("all")}>{t("projects.empty.resetDate")}</Button>
                 </div>
               )}
             </div>

@@ -9,6 +9,8 @@ import { Slider } from "@/components/ui/slider";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useI18n } from "@/components/i18n-provider";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export type SettingsPanelProps = {
   open: boolean;
@@ -37,6 +39,7 @@ export function SettingsPanel({
   showLeft,
   showRight,
 }: SettingsPanelProps) {
+  const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [entering, setEntering] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -118,19 +121,24 @@ export function SettingsPanel({
         )}
         role="dialog"
         aria-modal="true"
-        aria-label="Settings"
+        aria-label={t("editor.settings.title")}
       >
         <div className="flex items-center justify-between gap-2 p-4 border-b">
-          <h2 className="text-lg font-semibold">Editor Settings</h2>
-          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Close settings" onClick={onClose}>
+          <h2 className="text-lg font-semibold">{t("editor.settings.title")}</h2>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={t("editor.settings.close")} onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="flex items-center justify-between gap-3">
+            <Label className="text-sm font-medium">{t("editor.settings.language")}</Label>
+            <LanguageSwitcher compact />
+          </div>
+
           {/* Interface Density */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Interface Density</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t("editor.settings.interfaceDensity")}</h3>
             <div className="grid grid-cols-2 gap-4">
               <div
                 className={cn(
@@ -154,8 +162,8 @@ export function SettingsPanel({
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xs font-medium">Default</div>
-                  <div className="text-[10px] text-muted-foreground">Standard spacing and sizes</div>
+                  <div className="text-xs font-medium">{t("editor.settings.defaultDensity")}</div>
+                  <div className="text-[10px] text-muted-foreground">{t("editor.settings.defaultDensityDescription")}</div>
                 </div>
               </div>
 
@@ -182,8 +190,8 @@ export function SettingsPanel({
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xs font-medium">Compact</div>
-                  <div className="text-[10px] text-muted-foreground">Maximizes screen real estate</div>
+                  <div className="text-xs font-medium">{t("editor.settings.compactDensity")}</div>
+                  <div className="text-[10px] text-muted-foreground">{t("editor.settings.compactDensityDescription")}</div>
                 </div>
               </div>
             </div>
@@ -193,28 +201,28 @@ export function SettingsPanel({
 
           {/* Snapping */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Snapping</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t("editor.settings.snapping")}</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="snap-edges" className="text-sm">Snap to canvas edges</Label>
+                <Label htmlFor="snap-edges" className="text-sm">{t("editor.settings.snapEdges")}</Label>
                 <Switch id="snap-edges" checked={!!snapEdgesEnabled} onCheckedChange={(c) => setSnapEdgesEnabled(!!c)} />
               </div>
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="snap-layers" className="text-sm">Snap to other layers</Label>
+                <Label htmlFor="snap-layers" className="text-sm">{t("editor.settings.snapLayers")}</Label>
                 <Switch id="snap-layers" checked={!!snapLayersEnabled} onCheckedChange={(c) => setSnapLayersEnabled(!!c)} />
               </div>
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="snap-resize" className="text-sm">Snap when resizing</Label>
+                <Label htmlFor="snap-resize" className="text-sm">{t("editor.settings.snapResize")}</Label>
                 <Switch id="snap-resize" checked={!!snapResizeEnabled} onCheckedChange={(c) => setSnapResizeEnabled(!!c)} />
               </div>
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="snap-rotation" className="text-sm">Snap rotation (0°, 90°, 180°, 270°)</Label>
+                <Label htmlFor="snap-rotation" className="text-sm">{t("editor.settings.snapRotation")}</Label>
                 <Switch id="snap-rotation" checked={!!snapRotationEnabled} onCheckedChange={(c) => setSnapRotationEnabled(!!c)} />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="snap-threshold" className="text-sm">Sensitivity</Label>
-                  <Button variant="outline" size="sm" onClick={() => { setSnapThreshold(12) }}>Reset</Button>
+                  <Label htmlFor="snap-threshold" className="text-sm">{t("editor.settings.sensitivity")}</Label>
+                  <Button variant="outline" size="sm" onClick={() => { setSnapThreshold(12) }}>{t("common.reset")}</Button>
                 </div>
                 <Slider id="snap-threshold" value={[SNAP_THRESHOLD]} min={3} max={25} onValueChange={([c]) => setSnapThreshold(c)} />
               </div>
@@ -223,39 +231,39 @@ export function SettingsPanel({
 
           {/* Layer Controls */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Layer Controls</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t("editor.settings.layerControls")}</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="show-geometry-resize" className="text-sm">Show geometry resize buttons</Label>
+                <Label htmlFor="show-geometry-resize" className="text-sm">{t("editor.settings.showGeometryResize")}</Label>
                 <Switch id="show-geometry-resize" checked={!!showGeometryResize} onCheckedChange={(c) => setShowGeometryResize(!!c)} />
               </div>
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="show-align-buttons" className="text-sm">Show align buttons</Label>
+                <Label htmlFor="show-align-buttons" className="text-sm">{t("editor.settings.showAlign")}</Label>
                 <Switch id="show-align-buttons" checked={!!showAlignButtons} onCheckedChange={(c) => setShowAlignButtons(!!c)} />
               </div>
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="drag-sensitivity" className="text-sm">Drag-to-change sensitivity</Label>
-                  <Button variant="outline" size="sm" onClick={() => { setDragSensitivity(3) }}>Reset</Button>
+                  <Label htmlFor="drag-sensitivity" className="text-sm">{t("editor.settings.dragSensitivity")}</Label>
+                  <Button variant="outline" size="sm" onClick={() => { setDragSensitivity(3) }}>{t("common.reset")}</Button>
                 </div>
                 <Slider id="drag-sensitivity" value={[dragSensitivity]} min={0.5} max={10} step={0.5} onValueChange={([c]) => setDragSensitivity(c)} />
-                <p className="text-[11px] text-muted-foreground">Adjusts how fast values change when dragging numeric fields in the inspector.</p>
+                <p className="text-[11px] text-muted-foreground">{t("editor.settings.dragSensitivityDescription")}</p>
               </div>
             </div>
           </div>
 
           {/* Preview */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Preview</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t("editor.settings.preview")}</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="show-anchor-point" className="text-sm">Show anchor point</Label>
+                <Label htmlFor="show-anchor-point" className="text-sm">{t("editor.settings.showAnchor")}</Label>
                 <Switch id="show-anchor-point" checked={!!showAnchorPoint} onCheckedChange={(c) => setShowAnchorPoint(!!c)} />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="pinch-zoom-sensitivity" className="text-sm">Pinch to zoom sensitivity</Label>
-                  <Button variant="outline" size="sm" onClick={() => { setPinchZoomSensitivity(1) }}>Reset</Button>
+                  <Label htmlFor="pinch-zoom-sensitivity" className="text-sm">{t("editor.settings.pinchSensitivity")}</Label>
+                  <Button variant="outline" size="sm" onClick={() => { setPinchZoomSensitivity(1) }}>{t("common.reset")}</Button>
                 </div>
                 <Slider id="pinch-zoom-sensitivity" value={[pinchZoomSensitivity]} min={0.5} max={2} step={0.1} onValueChange={([c]) => setPinchZoomSensitivity(c)} />
               </div>
@@ -264,45 +272,45 @@ export function SettingsPanel({
 
           {/* Keyboard Shortcuts */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Keyboard Shortcuts</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t("editor.settings.shortcuts")}</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between"><span>Undo</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Z</span></div>
-              <div className="flex items-center justify-between"><span>Redo</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + Z</span></div>
-              <div className="flex items-center justify-between"><span>Zoom In</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + +</span></div>
-              <div className="flex items-center justify-between"><span>Zoom Out</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + -</span></div>
-              <div className="flex items-center justify-between"><span>Reset Zoom</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + 0</span></div>
-              <div className="flex items-center justify-between"><span>Export</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + E</span></div>
-              <div className="flex items-center justify-between"><span>Pan</span><span className="font-mono text-muted-foreground text-xs">Shift + Drag or Middle Click</span></div>
-              <div className="flex items-center justify-between"><span>Toggle Left Panel</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + L</span></div>
-              <div className="flex items-center justify-between"><span>Toggle Right Panel</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + I</span></div>
-              <div className="flex items-center justify-between"><span>Bring Forward</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + ]</span></div>
-              <div className="flex items-center justify-between"><span>Send Backward</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + [</span></div>
-              <div className="flex items-center justify-between"><span>Bring to Front</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + ]</span></div>
-              <div className="flex items-center justify-between"><span>Send to Back</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + [</span></div>
-              <div className="flex items-center justify-between"><span>Delete Layer</span><span className="font-mono text-muted-foreground text-xs">Delete</span></div>
-              <div className="flex items-center justify-between"><span>Resize from Center</span><span className="font-mono text-muted-foreground text-xs">Alt + Drag Handle</span></div>
-              <div className="flex items-center justify-between"><span>Maintain Aspect Ratio</span><span className="font-mono text-muted-foreground text-xs">Shift + Drag Handle</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.history.undo")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Z</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.history.redo")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + Z</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.shortcuts.zoomIn")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + +</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.shortcuts.zoomOut")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + -</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.shortcuts.recenter")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + 0</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.shortcuts.export")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + E</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.settings.pan")}</span><span className="font-mono text-muted-foreground text-xs">Shift + Drag or Middle Click</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.shortcuts.toggleLeft")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + L</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.shortcuts.toggleRight")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + I</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.settings.bringForward")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + ]</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.settings.sendBackward")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + [</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.settings.bringFront")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + ]</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.settings.sendBack")}</span><span className="font-mono text-muted-foreground text-xs">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + [</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.settings.deleteLayer")}</span><span className="font-mono text-muted-foreground text-xs">Delete</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.settings.resizeCenter")}</span><span className="font-mono text-muted-foreground text-xs">Alt + Drag Handle</span></div>
+              <div className="flex items-center justify-between"><span>{t("editor.settings.aspectRatio")}</span><span className="font-mono text-muted-foreground text-xs">Shift + Drag Handle</span></div>
             </div>
           </div>
 
           {/* Panels */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Panels</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{t("editor.settings.panels")}</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="auto-close-panels" className="text-sm">Auto-close right panel on narrow screens</Label>
+                <Label htmlFor="auto-close-panels" className="text-sm">{t("editor.settings.autoClose")}</Label>
                 <Switch id="auto-close-panels" checked={!!autoClosePanels} onCheckedChange={(c) => setAutoClosePanels(!!c)} />
               </div>
               <div className="flex items-center justify-between">
-                <span>Left panel width</span>
+                <span>{t("editor.settings.leftWidth")}</span>
                 <span className="font-mono text-muted-foreground text-xs">{leftWidth ?? '—'} px</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Right panel width</span>
+                <span>{t("editor.settings.rightWidth")}</span>
                 <span className="font-mono text-muted-foreground text-xs">{rightWidth ?? '—'} px</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>States panel height</span>
+                <span>{t("editor.settings.statesHeight")}</span>
                 <span className="font-mono text-muted-foreground text-xs">{statesHeight ?? '—'} px</span>
               </div>
               <div className="pt-2">
@@ -316,7 +324,7 @@ export function SettingsPanel({
                     setStatesHeight?.(350);
                   }}
                 >
-                  Reset to defaults
+                  {t("editor.settings.resetLayout")}
                 </Button>
               </div>
             </div>
@@ -335,14 +343,14 @@ export function SettingsPanel({
               }}
               disabled={!showLeft || !showRight}
             >
-              Show onboarding
+              {t("editor.settings.showOnboarding")}
             </Button>
           </div>
 
           {/* Version info */}
           <div className="pt-4 border-t">
             <div className="text-xs text-muted-foreground text-center">
-              Version: {latestVersion ?? '...'}
+              {t("editor.settings.version", { version: latestVersion ?? '...' })}
             </div>
           </div>
         </div>

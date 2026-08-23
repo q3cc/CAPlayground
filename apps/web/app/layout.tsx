@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Favicon } from "@/components/favicon"
 import UnofficialDomainBanner from "@/components/unofficial-domain-banner"
 import { PostHogProvider } from "@/components/posthog-provider"
+import { I18nProvider } from "@/components/i18n-provider"
+import { getServerLocale } from "@/lib/i18n/server"
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -46,21 +48,25 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const locale = await getServerLocale()
+
   return (
-    <html lang="en" className={`${sourceSans.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${sourceSans.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased min-h-screen bg-background text-foreground">
-        <PostHogProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <UnofficialDomainBanner />
-            <Favicon />
-            {children}
-          </ThemeProvider>
-        </PostHogProvider>
+        <I18nProvider initialLocale={locale}>
+          <PostHogProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              <UnofficialDomainBanner />
+              <Favicon />
+              {children}
+            </ThemeProvider>
+          </PostHogProvider>
+        </I18nProvider>
       </body>
     </html>
   )

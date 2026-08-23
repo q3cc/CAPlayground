@@ -25,6 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { getProject, updateProject, deleteProject, isUsingOPFS } from "@/lib/storage";
 import { SettingsPanel } from "./settings-panel";
 import { ExportDialog } from "./ExportDialog";
+import { useI18n } from "@/components/i18n-provider";
 
 
 interface ProjectMeta { id: string; name: string; width?: number; height?: number; createdAt?: string }
@@ -44,6 +45,7 @@ type MenuBarProps = {
 };
 
 export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLeft, toggleRight, leftWidth, rightWidth, statesHeight, setLeftWidth, setRightWidth, setStatesHeight }: MenuBarProps) {
+  const { locale, t } = useI18n();
   const router = useRouter();
   const { doc, undo, redo, setDoc, activeCA, setActiveCA, savingStatus, lastSavedAt, flushPersist } = useEditor();
   const { toast } = useToast();
@@ -149,6 +151,15 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
     router.push("/projects");
   };
 
+  const savingLabel = savingStatus === 'saving'
+    ? t("editor.save.saving")
+    : savingStatus === 'saved'
+      ? t("editor.save.saved")
+      : t("editor.save.idle");
+  const activeCALabel = activeCA === 'floating'
+    ? t("editor.ca.floating")
+    : t("editor.ca.background");
+
   return (
     <div className="w-full h-12 flex items-center justify-between px-3 border-b bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center gap-2">
@@ -157,7 +168,7 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 px-2">
                 <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline ml-2">{doc?.meta.name ?? "Project"}</span>
+                <span className="hidden sm:inline ml-2">{doc?.meta.name ?? t("editor.project.fallback")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-52">
@@ -165,13 +176,13 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
                 className="cursor-pointer"
                 onClick={async () => { await flushPersist(); router.push('/projects'); }}
               >
-                <ArrowLeft className="h-4 w-4 mr-2" /> Back to projects
+                <ArrowLeft className="h-4 w-4 mr-2" /> {t("editor.project.back")}
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer" onClick={() => setRenameOpen(true)}>
-                <Pencil className="h-4 w-4 mr-2" /> Rename
+                <Pencil className="h-4 w-4 mr-2" /> {t("editor.project.rename")}
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive cursor-pointer" onClick={() => setDeleteOpen(true)}>
-                <Trash2 className="h-4 w-4 mr-2" /> Delete
+                <Trash2 className="h-4 w-4 mr-2" /> {t("common.delete")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -182,7 +193,7 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
             variant="ghost"
             size="icon"
             className="h-8 w-8 p-0"
-            aria-label="Undo"
+            aria-label={t("editor.history.undo")}
             title={`${typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Z`}
             onClick={() => undo()}
           >
@@ -192,7 +203,7 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
             variant="ghost"
             size="icon"
             className="h-8 w-8 p-0"
-            aria-label="Redo"
+            aria-label={t("editor.history.redo")}
             title={`${typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + Z`}
             onClick={() => redo()}
           >
@@ -205,9 +216,9 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
             <button
               className="text-xs px-2 py-0.5 rounded-full border border-muted-foreground/50 text-muted-foreground cursor-pointer hover:border-muted-foreground transition-colors"
               onClick={async () => { await flushPersist(); setShowManualSave(false); }}
-              title="Save now"
+              title={t("editor.save.manual")}
             >
-              Manual Save
+              {t("editor.save.manualAction")}
             </button>
           ) : (
             <div className="flex items-center gap-2">
@@ -215,7 +226,7 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
               <div
                 className="flex items-center gap-1.5"
                 aria-live="polite"
-                title={`${savingStatus === 'saving' ? 'Saving…' : savingStatus === 'saved' ? 'Saved' : 'Idle'}${lastSavedAt ? ` - Last saved ${new Date(lastSavedAt).toLocaleTimeString()}` : ''}`}
+                title={`${savingLabel}${lastSavedAt ? ` - ${t("editor.save.last", { time: new Date(lastSavedAt).toLocaleTimeString(locale) })}` : ''}`}
               >
                 <div
                   className={`w-2 h-2 rounded-full ${savingStatus === 'saving'
@@ -233,7 +244,7 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
                         : 'text-muted-foreground'
                     }`}
                 >
-                  {savingStatus === 'saving' ? 'Saving…' : savingStatus === 'saved' ? 'Saved' : 'Idle'}
+                  {savingLabel}
                 </span>
               </div>
             </div>
@@ -250,7 +261,7 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
                 className="h-8 px-2 gap-2 cursor-default"
                 disabled
               >
-                <span className="text-sm">Wallpaper</span>
+                <span className="text-sm">{t("editor.ca.wallpaper")}</span>
               </Button>
             ) : (
               <DropdownMenu>
@@ -258,24 +269,24 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
                   <Button
                     variant="ghost"
                     className="h-8 px-2 gap-2"
-                    aria-label={`Active CA: ${activeCA === 'floating' ? 'Floating' : 'Background'}`}
+                    aria-label={t("editor.ca.active", { name: activeCALabel })}
                     aria-expanded={false}
                     role="button"
                   >
-                    <span className="text-sm">{activeCA === 'floating' ? 'Floating' : 'Background'}</span>
+                    <span className="text-sm">{activeCALabel}</span>
                     <ArrowUpDown className="h-4 w-4 opacity-70" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="center" className="w-80 p-2">
                   <DropdownMenuLabel>
-                    <div className="text-sm font-medium">Choose Active CA</div>
+                    <div className="text-sm font-medium">{t("editor.ca.choose")}</div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {activeCA === 'floating' && (
                     <>
                       <div className="px-2 py-2">
                         <div className="flex items-center justify-between gap-3">
-                          <Label htmlFor="show-background" className="text-sm">Show background</Label>
+                          <Label htmlFor="show-background" className="text-sm">{t("editor.ca.showBackground")}</Label>
                           <Switch id="show-background" checked={showBackground} onCheckedChange={setShowBackground} />
                         </div>
                       </div>
@@ -293,8 +304,8 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
                       <div className="flex items-center gap-3">
                         <LayersIcon className="h-4 w-4" />
                         <div className="flex-1 text-left">
-                          <div>Background</div>
-                          <div className="text-xs text-muted-foreground">Appears behind the clock.</div>
+                          <div>{t("editor.ca.background")}</div>
+                          <div className="text-xs text-muted-foreground">{t("editor.ca.backgroundDescription")}</div>
                         </div>
                         {activeCA === 'background' && <Check className="h-4 w-4" />}
                       </div>
@@ -309,8 +320,8 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
                       <div className="flex items-center gap-3">
                         <LayersIcon className="h-4 w-4" />
                         <div className="flex-1 text-left">
-                          <div>Floating</div>
-                          <div className="text-xs text-muted-foreground">Appears over the clock.</div>
+                          <div>{t("editor.ca.floating")}</div>
+                          <div className="text-xs text-muted-foreground">{t("editor.ca.floatingDescription")}</div>
                         </div>
                         {activeCA === 'floating' && <Check className="h-4 w-4" />}
                       </div>
@@ -326,8 +337,8 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
             variant="ghost"
             size="icon"
             className="h-8 w-8 p-0"
-            title={showLeft ? "Hide left panel" : "Show left panel"}
-            aria-label={showLeft ? "Hide left panel" : "Show left panel"}
+            title={showLeft ? t("editor.panel.hideLeft") : t("editor.panel.showLeft")}
+            aria-label={showLeft ? t("editor.panel.hideLeft") : t("editor.panel.showLeft")}
             onClick={() => toggleLeft?.()}
           >
             <PanelLeft className={`h-4 w-4 ${showLeft ? '' : 'opacity-50'}`} />
@@ -336,8 +347,8 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
             variant="ghost"
             size="icon"
             className="h-8 w-8 p-0"
-            title={showRight ? "Hide right panel" : "Show right panel"}
-            aria-label={showRight ? "Hide right panel" : "Show right panel"}
+            title={showRight ? t("editor.panel.hideRight") : t("editor.panel.showRight")}
+            aria-label={showRight ? t("editor.panel.hideRight") : t("editor.panel.showRight")}
             onClick={() => toggleRight?.()}
           >
             <PanelRight className={`h-4 w-4 ${showRight ? '' : 'opacity-50'}`} />
@@ -348,7 +359,7 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Toggle theme"
+            aria-label={t("nav.theme.toggle")}
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="h-8 w-8 p-0"
           >
@@ -365,7 +376,7 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
             variant="ghost"
             size="icon"
             className="h-8 w-8 p-0"
-            aria-label="Settings"
+            aria-label={t("common.settings")}
             data-tour-id="settings-button"
             onClick={() => setSettingsOpen(true)}
           >
@@ -379,67 +390,67 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
       <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Keyboard Shortcuts</DialogTitle>
+            <DialogTitle>{t("editor.shortcuts.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <span>Undo</span>
+              <span>{t("editor.history.undo")}</span>
               <span className="font-mono text-muted-foreground">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Z</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Redo</span>
+              <span>{t("editor.history.redo")}</span>
               <span className="font-mono text-muted-foreground">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + Z</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Zoom in</span>
+              <span>{t("editor.shortcuts.zoomIn")}</span>
               <span className="font-mono text-muted-foreground">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + +</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Zoom out</span>
+              <span>{t("editor.shortcuts.zoomOut")}</span>
               <span className="font-mono text-muted-foreground">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + -</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Re-center</span>
+              <span>{t("editor.shortcuts.recenter")}</span>
               <span className="font-mono text-muted-foreground">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + 0</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Export</span>
+              <span>{t("editor.shortcuts.export")}</span>
               <span className="font-mono text-muted-foreground">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + E</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Zoom with scroll</span>
+              <span>{t("editor.shortcuts.zoomScroll")}</span>
               <span className="font-mono text-muted-foreground">Shift + Scroll</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Pan canvas</span>
+              <span>{t("editor.shortcuts.pan")}</span>
               <span className="font-mono text-muted-foreground">Middle Click + Drag</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Pan canvas (alt)</span>
+              <span>{t("editor.shortcuts.panAlt")}</span>
               <span className="font-mono text-muted-foreground">Shift + Drag</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Toggle left panel</span>
+              <span>{t("editor.shortcuts.toggleLeft")}</span>
               <span className="font-mono text-muted-foreground">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + L</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Toggle right panel</span>
+              <span>{t("editor.shortcuts.toggleRight")}</span>
               <span className="font-mono text-muted-foreground">{typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + Shift + I</span>
             </div>
             <div className="flex items-center justify-between border-t pt-2 mt-2">
-              <span className="font-medium">Inspector Inputs</span>
+              <span className="font-medium">{t("editor.shortcuts.inspectorInputs")}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Change value (horizontal)</span>
+              <span>{t("editor.shortcuts.changeHorizontal")}</span>
               <span className="font-mono text-muted-foreground">Drag</span>
             </div>
             <div className="flex items-center justify-between">
-              <span>Change value (slower)</span>
+              <span>{t("editor.shortcuts.changeSlower")}</span>
               <span className="font-mono text-muted-foreground">Shift + Drag</span>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShortcutsOpen(false)}>Close</Button>
+            <Button variant="outline" onClick={() => setShortcutsOpen(false)}>{t("common.close")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -448,8 +459,8 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
       <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Rename Project</DialogTitle>
-            <DialogDescription>Update the name of your project.</DialogDescription>
+            <DialogTitle>{t("editor.project.renameTitle")}</DialogTitle>
+            <DialogDescription>{t("editor.project.renameDescription")}</DialogDescription>
           </DialogHeader>
           <Input
             value={name}
@@ -461,8 +472,8 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
             }}
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRenameOpen(false)}>Cancel</Button>
-            <Button onClick={performRename} disabled={!name.trim()}>Save</Button>
+            <Button variant="outline" onClick={() => setRenameOpen(false)}>{t("common.cancel")}</Button>
+            <Button onClick={performRename} disabled={!name.trim()}>{t("common.save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -471,15 +482,15 @@ export function MenuBar({ projectId, showLeft = true, showRight = true, toggleLe
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete project?</AlertDialogTitle>
+            <AlertDialogTitle>{t("editor.project.deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the project and its editor data.
+              {t("editor.project.deleteDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={performDelete}>
-              Delete
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

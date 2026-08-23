@@ -13,6 +13,8 @@ dist/
 
 # production
 /build
+apps/desktop/build/
+apps/desktop/.cache/
 
 # debug
 npm-debug.log*

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Menu, X, Sun, Moon, ArrowRight, User, LogOut, LayoutDashboard } from "lucide-react"
 import { useTheme } from "next-themes"
 import { getSupabaseBrowserClient } from "@/lib/supabase"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { useI18n } from "@/components/i18n-provider"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function Navigation() {
+  const { t } = useI18n()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { theme, setTheme } = useTheme()
@@ -132,16 +135,16 @@ export function Navigation() {
             {/* Desktop Navigation */}
             <div className="hidden min-[1045px]:flex items-center justify-center gap-6 justify-self-center">
               <Link href="/docs" className="text-foreground hover:text-accent transition-colors">
-                Docs
+                {t("nav.docs")}
               </Link>
               <Link href="/contributors" className="text-foreground hover:text-accent transition-colors">
-                Contributors
+                {t("nav.contributors")}
               </Link>
               <Link href="/roadmap" className="text-foreground hover:text-accent transition-colors">
-                Roadmap
+                {t("nav.roadmap")}
               </Link>
               <Link href="/wallpapers" className="text-foreground hover:text-accent transition-colors">
-                Wallpapers
+                {t("nav.wallpapers")}
               </Link>
             </div>
 
@@ -153,7 +156,7 @@ export function Navigation() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      aria-label="Account"
+                      aria-label={t("common.account")}
                       className="rounded-full h-9 w-9 p-0"
                     >
                       <User className="h-5 w-5" />
@@ -161,7 +164,7 @@ export function Navigation() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuItem onClick={() => (window.location.href = "/dashboard")}>
-                      <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                      <LayoutDashboard className="mr-2 h-4 w-4" /> {t("nav.dashboard")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={async () => {
@@ -171,27 +174,27 @@ export function Navigation() {
                         window.location.href = "/"
                       }}
                     >
-                      <LogOut className="mr-2 h-4 w-4" /> Sign out
+                      <LogOut className="mr-2 h-4 w-4" /> {t("common.signOut")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
                 <Link href="/signin">
                   <Button variant="outline" className="font-semibold">
-                    Sign In
+                    {t("common.signIn")}
                   </Button>
                 </Link>
               )}
               <Link href="/projects">
                 <Button variant="default" className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
-                  Projects <ArrowRight className="h-4 w-4 ml-2" />
+                  {t("nav.projects")} <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </Link>
 
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Toggle theme"
+                aria-label={t("nav.theme.toggle")}
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 className="rounded-full h-9 w-9 p-0"
               >
@@ -201,6 +204,7 @@ export function Navigation() {
                   <Moon className="h-5 w-5" />
                 )}
               </Button>
+              <LanguageSwitcher />
             </div>
 
             {/* Mobile Menu Button */}
@@ -208,7 +212,7 @@ export function Navigation() {
               id="mobile-menu-button"
               className="min-[1045px]:hidden p-2 rounded-lg hover:bg-muted transition-colors justify-self-end"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
+              aria-label={t("nav.menu.toggle")}
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -233,28 +237,28 @@ export function Navigation() {
                   className="text-foreground hover:text-accent hover:bg-muted/50 transition-all duration-200 py-3 px-6 rounded-lg mx-2 text-4xl"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Docs
+                  {t("nav.docs")}
                 </Link>
                 <Link
                   href="/roadmap"
                   className="text-foreground hover:text-accent hover:bg-muted/50 transition-all duration-200 py-3 px-6 rounded-lg mx-2 text-4xl"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Roadmap
+                  {t("nav.roadmap")}
                 </Link>
                 <Link
                   href="/wallpapers"
                   className="text-foreground hover:text-accent hover:bg-muted/50 transition-all duration-200 py-3 px-6 rounded-lg mx-2 text-4xl"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Wallpapers
+                  {t("nav.wallpapers")}
                 </Link>
                 <Link
                   href="/contributors"
                   className="text-foreground hover:text-accent hover:bg-muted/50 transition-all duration-200 py-3 px-6 rounded-lg mx-2 text-4xl"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Contributors
+                  {t("nav.contributors")}
                 </Link>
                 {/* bottom primary actions */}
                 <div className="px-2 pt-2 pb-3 my-2">
@@ -264,15 +268,15 @@ export function Navigation() {
                         <Button
                           variant="outline"
                           className="w-full text-lg h-10"
-                          aria-label="Account"
+                          aria-label={t("common.account")}
                         >
-                          Account
+                          {t("common.account")}
                         </Button>
                       </Link>
                     ) : (
                       <Link href="/signin" onClick={() => setIsMenuOpen(false)} className="flex-1">
                         <Button variant="outline" className="w-full text-lg h-10">
-                          Sign In
+                          {t("common.signIn")}
                         </Button>
                       </Link>
                     )}
@@ -281,7 +285,7 @@ export function Navigation() {
                         variant="default"
                         className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold w-full text-lg h-10"
                       >
-                        Projects <ArrowRight className="h-4 w-4 ml-2" />
+                        {t("nav.projects")} <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     </Link>
                   </div>
@@ -297,14 +301,17 @@ export function Navigation() {
                   >
                     {mounted && theme === "dark" ? (
                       <>
-                        <Sun className="h-5 w-5 mr-2" /> Light Mode
+                        <Sun className="h-5 w-5 mr-2" /> {t("nav.theme.light")}
                       </>
                     ) : (
                       <>
-                        <Moon className="h-5 w-5 mr-2" /> Dark Mode
+                        <Moon className="h-5 w-5 mr-2" /> {t("nav.theme.dark")}
                       </>
                     )}
                   </Button>
+                  <div className="flex justify-center pt-1">
+                    <LanguageSwitcher compact />
+                  </div>
                 </div>
               </div>
             </div>

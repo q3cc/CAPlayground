@@ -19,8 +19,10 @@ import { getProject } from "@/lib/storage";
 import { TimelineProvider } from "@/context/TimelineContext";
 import { cn } from "@/lib/utils";
 import { assetCache } from "@/hooks/use-asset-url";
+import { useI18n } from "@/components/i18n-provider";
 
 export default function EditorPage() {
+  const { t } = useI18n();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const projectId = params?.id;
@@ -179,11 +181,11 @@ export default function EditorPage() {
                       <button
                         className={`px-3 py-1 rounded text-sm border ${mobilePanelScreen === 'layers_states' ? 'bg-accent text-accent-foreground' : 'bg-background'}`}
                         onClick={() => setMobilePanelScreen('layers_states')}
-                      >Layers/States</button>
+                      >{t("editor.panel.layersStates")}</button>
                       <button
                         className={`px-3 py-1 rounded text-sm border ${mobilePanelScreen === 'inspector' ? 'bg-accent text-accent-foreground' : 'bg-background'}`}
                         onClick={() => setMobilePanelScreen('inspector')}
-                      >Inspector</button>
+                      >{t("editor.panel.inspector")}</button>
                     </div>
                     <div className="h-full overflow-auto">
                       {mobilePanelScreen === 'layers_states' ? (
@@ -242,7 +244,7 @@ export default function EditorPage() {
                             window.addEventListener('mousemove', onMove);
                             window.addEventListener('mouseup', onUp);
                           }}
-                          aria-label="Resize layers/states panels"
+                          aria-label={t("editor.panel.resizeLayersStates")}
                         />
                         <div className="min-h-[120px] overflow-auto" style={{ flex: `0 0 ${statesHeight}px` }}>
                           <StatesPanel />
@@ -267,7 +269,7 @@ export default function EditorPage() {
                         window.addEventListener('mousemove', onMove);
                         window.addEventListener('mouseup', onUp);
                       }}
-                      aria-label="Resize left column"
+                      aria-label={t("editor.panel.resizeLeft")}
                     />
                   </>
                 )}
@@ -296,7 +298,7 @@ export default function EditorPage() {
                         window.addEventListener('mousemove', onMove);
                         window.addEventListener('mouseup', onUp);
                       }}
-                      aria-label="Resize right column"
+                      aria-label={t("editor.panel.resizeRight")}
                     />
 
                     <div className="min-h-0 flex-shrink-0" style={{ width: rightWidth }}>

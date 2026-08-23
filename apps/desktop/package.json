@@ -1,0 +1,75 @@
+{
+  "name": "@caplayground/desktop",
+  "version": "1.0.0",
+  "private": true,
+  "author": "CAPlayground contributors",
+  "description": "CAPlayground desktop client for Windows and macOS",
+  "main": "src/main.cjs",
+  "scripts": {
+    "dev": "electron src/main.cjs --dev",
+    "build:web": "npm --prefix ../web run build",
+    "prepare:standalone": "node scripts/prepare-standalone.cjs",
+    "dist:win": "npm run build:web && npm run prepare:standalone && electron-builder --win nsis portable --x64",
+    "dist:mac": "npm run build:web && npm run prepare:standalone && electron-builder --mac dmg zip --x64 --arm64"
+  },
+  "devDependencies": {
+    "electron": "^43.4.1",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "io.github.caplayground.desktop",
+    "productName": "CAPlayground",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/web",
+        "to": "web",
+        "filter": [
+          "**/*",
+          "!node_modules{,/**/*}"
+        ]
+      },
+      {
+        "from": "build/web/node_modules",
+        "to": "web/node_modules",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "win": {
+      "icon": "../web/public/icon-dark.png",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "artifactName": "${productName}-${version}-Windows-${arch}-Setup.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-Windows-${arch}-Portable.${ext}"
+    },
+    "mac": {
+      "icon": "../web/public/icon-dark.png",
+      "category": "public.app-category.graphics-design",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "identity": null
+    }
+  }
+}

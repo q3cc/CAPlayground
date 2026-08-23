@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { BentoItem, LayerItem } from "./bento-item"
 import { BentoBasicLayer } from "./layers/basic"
 import { BentoGradientLayer } from "./layers/gradient"
@@ -21,17 +21,7 @@ import {
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Download, Edit, Youtube, Check, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-const layers: LayerItem[] = [
-    { id: "basic", title: "Basic Layer", description: "A fundamental solid color or shape layer (CALayer) for backgrounds or simple elements.", type: "basic", exampleId: "4983462" },
-    { id: "gradient", title: "Gradient Layer", description: "Creates smooth color gradients with configurable colors, directions, and stops.", type: "gradient", exampleId: "9612103" },
-    { id: "image", title: "Image Layer", description: "Renders static images or photos, supporting scaling, positioning, and masking.", type: "image", exampleId: "9372814" },
-    { id: "video", title: "Video Layer", description: "Plays embedded video content as a looping animated element.", type: "video", exampleId: "9232798" },
-    { id: "emitter", title: "Emitter Layer", description: "Generates particle effects (CAEmitterLayer) like snow, fire, or confetti with customizable particles.", type: "emitter", exampleId: "1633426" },
-    { id: "transform", title: "Transform Layer", description: "Controls 3D transformations, perspective, and depth for immersive, realistic layer interactions.", type: "transform", exampleId: "9531199" },
-    { id: "replicator", title: "Replicator Layer", description: "Duplicates child layers in patterns (e.g., grids, circles) for efficient repetitive designs.", type: "replicator", exampleId: "5733952" },
-    { id: "liquid-glass", title: "Liquid Glass Layer", description: "A special effect layer simulating refractive, fluid glass distortion", type: "liquid-glass", exampleId: "7670567" },
-]
+import { useI18n } from "@/components/i18n-provider"
 
 function isVideo(src: string) {
     const lower = src.toLowerCase()
@@ -39,9 +29,20 @@ function isVideo(src: string) {
 }
 
 export function BentoGridSection() {
+    const { t } = useI18n()
     const [selectedWallpaper, setSelectedWallpaper] = useState<any | null>(null)
     const [wallpaperData, setWallpaperData] = useState<any>(null)
     const [copied, setCopied] = useState(false)
+    const layers: LayerItem[] = useMemo(() => [
+        { id: "basic", title: t("home.layers.basic.title"), description: t("home.layers.basic.description"), type: "basic", exampleId: "4983462" },
+        { id: "gradient", title: t("home.layers.gradient.title"), description: t("home.layers.gradient.description"), type: "gradient", exampleId: "9612103" },
+        { id: "image", title: t("home.layers.image.title"), description: t("home.layers.image.description"), type: "image", exampleId: "9372814" },
+        { id: "video", title: t("home.layers.video.title"), description: t("home.layers.video.description"), type: "video", exampleId: "9232798" },
+        { id: "emitter", title: t("home.layers.emitter.title"), description: t("home.layers.emitter.description"), type: "emitter", exampleId: "1633426" },
+        { id: "transform", title: t("home.layers.transform.title"), description: t("home.layers.transform.description"), type: "transform", exampleId: "9531199" },
+        { id: "replicator", title: t("home.layers.replicator.title"), description: t("home.layers.replicator.description"), type: "replicator", exampleId: "5733952" },
+        { id: "liquid-glass", title: t("home.layers.liquidGlass.title"), description: t("home.layers.liquidGlass.description"), type: "liquid-glass", exampleId: "7670567" },
+    ], [t])
 
     useEffect(() => {
         fetch("https://raw.githubusercontent.com/CAPlayground/wallpapers/refs/heads/main/wallpapers.json")
@@ -81,10 +82,10 @@ export function BentoGridSection() {
         <div className="w-full max-w-[1400px] mx-auto px-4 md:px-6 py-24">
             <div className="text-center mb-16 space-y-4">
                 <h2 className="font-heading text-4xl md:text-6xl font-bold">
-                    Layers of Possibility.
+                    {t("home.layers.title")}
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
-                    Build complex wallpaper states by combining different layer types, each with their own unique properties and animations.
+                    {t("home.layers.description")}
                 </p>
             </div>
 
@@ -109,7 +110,7 @@ export function BentoGridSection() {
                             <DialogHeader>
                                 <DialogTitle className="text-2xl font-bold">{selectedWallpaper.name}</DialogTitle>
                                 <DialogDescription className="text-base">
-                                    by {selectedWallpaper.creator} (submitted on {selectedWallpaper.from})
+                                    {t("home.featured.by", { creator: selectedWallpaper.creator, source: selectedWallpaper.from })}
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="mt-4 space-y-6">
@@ -132,19 +133,19 @@ export function BentoGridSection() {
                                 </div>
 
                                 <div>
-                                    <h3 className="font-semibold mb-2">Description</h3>
+                                    <h3 className="font-semibold mb-2">{t("home.layers.wallpaperDescription")}</h3>
                                     <p className="text-sm text-muted-foreground">{selectedWallpaper.description}</p>
                                 </div>
 
                                 <div className="flex flex-col gap-3">
                                     <Button className="w-full" onClick={() => window.open(`${wallpaperData.base_url}${selectedWallpaper.file}`, '_blank')}>
                                         <Download className="h-4 w-4 mr-2" />
-                                        Download .tendies
+                                        {t("home.layers.download")}
                                     </Button>
 
                                     <Button variant="outline" className="w-full" asChild>
                                         <a href={`/wallpapers?id=${selectedWallpaper.id}&action=edit`}>
-                                            <Edit className="h-4 w-4 mr-2" /> Open in Editor
+                                            <Edit className="h-4 w-4 mr-2" /> {t("home.layers.openEditor")}
                                         </a>
                                     </Button>
 
@@ -154,7 +155,7 @@ export function BentoGridSection() {
                                         onClick={() => window.open('https://www.youtube.com/watch?v=nSBQIwAaAEc', '_blank')}
                                     >
                                         <Youtube className="h-4 w-4 mr-2" />
-                                        Watch Tutorial
+                                        {t("home.layers.tutorial")}
                                     </Button>
 
                                     <Button
@@ -165,12 +166,12 @@ export function BentoGridSection() {
                                         {copied ? (
                                             <>
                                                 <Check className="h-4 w-4 mr-2" />
-                                                Copied
+                                                {t("home.layers.copied")}
                                             </>
                                         ) : (
                                             <>
                                                 <Copy className="h-4 w-4 mr-2" />
-                                                Copy Link
+                                                {t("home.layers.copyLink")}
                                             </>
                                         )}
                                     </Button>

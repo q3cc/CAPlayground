@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Send, Filter as NotificationIcon, Github, Star, Download } from "lucide-react"
 import Image from "next/image"
 import { BentoGridSection } from "@/components/home/bento-grid-section"
+import { getServerI18n } from "@/lib/i18n/server"
 
 
 
@@ -33,6 +34,7 @@ function isVideo(src: string) {
 }
 
 export default async function HomePage() {
+  const { locale, t } = await getServerI18n()
   let stars: number | null = null
   let commitCount: number | null = null
   let mostDownloaded: { wallpaper: WallpaperItem; baseUrl: string; downloads: number } | null = null
@@ -149,23 +151,23 @@ export default async function HomePage() {
                   <Link href="/projects" className="inline-block">
                     <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-accent/10 backdrop-blur-md border border-accent/20 text-accent text-sm font-medium hover:bg-accent/20 transition-colors shadow-sm">
                       <NotificationIcon className="h-4 w-4 mr-2" />
-                      <span>Blending Modes and Filters are out!</span>
+                      <span>{t("home.badge")}</span>
                     </div>
                   </Link>
 
                   <h1 className="font-heading text-5xl sm:text-6xl md:text-7xl font-bold leading-tight tracking-tight drop-shadow-2xl">
-                    The Open Source <br />
-                    <span className="text-accent">CA Wallpaper Editor.</span>
+                    {t("home.hero.openSource")} <br />
+                    <span className="text-accent">{t("home.hero.product")}</span>
                   </h1>
 
                   <p className="text-xl md:text-2xl text-muted-foreground max-w-xl font-medium drop-shadow-md">
-                    Create beautiful animated wallpapers for iOS and iPadOS on any desktop computer with CAPlayground.
+                    {t("home.hero.description")}
                   </p>
 
                   <div className="pt-2">
                     <Link href="/projects" className="block w-full md:w-auto">
                       <Button size="lg" className="w-full md:w-auto h-14 px-8 text-lg min-w-[200px] bg-accent hover:bg-accent/90 text-white font-semibold shadow-lg shadow-accent/20">
-                        Get Started <Send className="ml-2 h-5 w-5" />
+                        {t("home.hero.start")} <Send className="ml-2 h-5 w-5" />
                       </Button>
                     </Link>
                   </div>
@@ -176,7 +178,7 @@ export default async function HomePage() {
                   <Link href="https://github.com/CAPlayground/CAPlayground" target="_blank" rel="noopener noreferrer" className="block w-full md:w-auto">
                     <Button size="lg" variant="outline" className="w-full md:w-auto h-14 md:h-12 px-8 text-base min-w-[200px] backdrop-blur-md bg-background/50 hover:bg-background/80 border-zinc-200 dark:border-zinc-700 shadow-lg">
                       <Github className="mr-2 h-5 w-5" />
-                      <span>View GitHub{stars !== null ? ` ${new Intl.NumberFormat().format(stars)}` : ""}</span>
+                      <span>{t("common.viewGithub")}{stars !== null ? ` ${new Intl.NumberFormat(locale).format(stars)}` : ""}</span>
                       {stars !== null && <Star className="ml-1 h-4 w-4 fill-current opacity-50" />}
                     </Button>
                   </Link>
@@ -195,7 +197,7 @@ export default async function HomePage() {
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-20">
               <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-                CAPlayground is growing!
+                {t("home.growing.title")}
               </h2>
             </div>
 
@@ -207,7 +209,7 @@ export default async function HomePage() {
                   </span>
                 </div>
                 <p className="mt-4 text-xl md:text-2xl text-muted-foreground font-medium max-w-[250px]">
-                  users in the first 4 months
+                  {t("home.growing.users")}
                 </p>
               </div>
 
@@ -218,7 +220,7 @@ export default async function HomePage() {
                   </span>
                 </div>
                 <p className="mt-4 text-xl md:text-2xl text-muted-foreground font-medium max-w-[250px]">
-                  Discord server members
+                  {t("home.growing.discord")}
                 </p>
               </div>
 
@@ -229,7 +231,7 @@ export default async function HomePage() {
                   </span>
                 </div>
                 <p className="mt-4 text-xl md:text-2xl text-muted-foreground font-medium max-w-[250px]">
-                  GitHub Commits
+                  {t("home.growing.commits")}
                 </p>
               </div>
             </div>
@@ -274,13 +276,13 @@ export default async function HomePage() {
                         {mostDownloaded.wallpaper.name}
                       </h3>
                       <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                        by {mostDownloaded.wallpaper.creator} (submitted on {mostDownloaded.wallpaper.from})
+                        {t("home.featured.by", { creator: mostDownloaded.wallpaper.creator, source: mostDownloaded.wallpaper.from })}
                       </p>
                       {mostDownloaded.downloads > 0 && (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
                           <Download className="h-3.5 w-3.5" />
                           <span>{mostDownloaded.downloads}</span>
-                          <span>{mostDownloaded.downloads === 1 ? "Download" : "Downloads"}</span>
+                          <span>{mostDownloaded.downloads === 1 ? t("home.featured.download") : t("home.featured.downloads")}</span>
                         </div>
                       )}
                       <p className="text-sm text-muted-foreground line-clamp-3">
@@ -291,21 +293,20 @@ export default async function HomePage() {
                 </div>
                 <div className="space-y-4 text-center lg:text-left">
                   <h2 className="font-heading text-3xl md:text-4xl font-bold">
-                    Explore the most downloaded wallpaper
+                    {t("home.featured.title")}
                   </h2>
                   <p className="text-muted-foreground text-lg max-w-xl mx-auto lg:mx-0">
-                    See what the community loves most, then dive into the full gallery to discover more animated
-                    wallpapers for your devices.
+                    {t("home.featured.description")}
                   </p>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-2">
                     <Link href={`/wallpapers?id=${mostDownloaded.wallpaper.id}`}>
                       <Button size="lg" className="px-6 bg-accent hover:bg-accent/90 text-white font-semibold">
-                        View this wallpaper
+                        {t("home.featured.view")}
                       </Button>
                     </Link>
                     <Link href="/wallpapers">
                       <Button size="lg" variant="outline" className="px-6">
-                        View wallpaper gallery
+                        {t("home.featured.gallery")}
                       </Button>
                     </Link>
                   </div>
