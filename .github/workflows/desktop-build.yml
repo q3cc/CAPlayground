@@ -47,5 +47,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: CAPlayground-${{ matrix.name }}
-          path: apps/desktop/dist/*
+          path: |
+            apps/desktop/dist/*.exe
+            apps/desktop/dist/*.dmg
+            apps/desktop/dist/*.zip
+            apps/desktop/dist/*.blockmap
           if-no-files-found: error
