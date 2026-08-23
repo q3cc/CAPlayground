@@ -9,6 +9,8 @@
     "dev": "electron src/launcher.cjs --dev",
     "mcp": "electron src/launcher.cjs --mcp",
     "test:mcp": "node scripts/mcp-smoke.cjs",
+    "test:app-origin": "node scripts/app-protocol-smoke.cjs",
+    "test:storage-origin": "node scripts/storage-origin-smoke.cjs",
     "build:web": "npm --prefix ../web run build",
     "prepare:standalone": "node scripts/prepare-standalone.cjs",
     "dist:win": "npm run build:web && npm run prepare:standalone && electron-builder --win nsis portable --x64",
@@ -58,6 +60,7 @@
       "artifactName": "${productName}-${version}-Windows-${arch}-Setup.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     },

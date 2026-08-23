@@ -1,10 +1,14 @@
-const { app, BrowserWindow, Menu, shell, ipcMain, clipboard, dialog } = require("electron")
+const { app, BrowserWindow, Menu, shell, ipcMain, clipboard, dialog, protocol, net: electronNet } = require("electron")
 const { spawn } = require("node:child_process")
 const fs = require("node:fs")
 const http = require("node:http")
-const net = require("node:net")
+const nodeNet = require("node:net")
 const path = require("node:path")
 const { startMcpBridge } = require("./mcp-bridge.cjs")
+const { APP_ORIGIN, installAppProtocol, isAppUrl, registerAppScheme } = require("./app-protocol.cjs")
+const { resolveStorageOrigin, saveStorageOrigin } = require("./storage-origin.cjs")
+
+registerAppScheme(protocol)
 
 const isDev = process.argv.includes("--dev") || !app.isPackaged
 let mainWindow = null
@@ -12,6 +16,7 @@ let webServer = null
 let quitting = false
 let appUrlPromise = null
 let mcpBridge = null
+let appProtocolInstalled = false
 
 function debugStartup(message) {
   if (process.env.CAPLAYGROUND_DEBUG_STARTUP !== "1") return
@@ -24,12 +29,12 @@ function debugStartup(message) {
 
 debugStartup(`main loaded; packaged=${app.isPackaged}; argv=${JSON.stringify(process.argv)}`)
 
-function getOpenPort() {
+function getOpenPort(preferredPort) {
   return new Promise((resolve, reject) => {
-    const server = net.createServer()
+    const server = nodeNet.createServer()
     server.unref()
     server.on("error", reject)
-    server.listen(0, "127.0.0.1", () => {
+    server.listen(preferredPort || 0, "127.0.0.1", () => {
       const address = server.address()
       const port = typeof address === "object" && address ? address.port : 3000
       server.close(() => resolve(port))
@@ -66,13 +71,21 @@ function waitForServer(url, timeoutMs = 45_000) {
   })
 }
 
-async function startWebServer() {
+async function startWebServer(preferredPort) {
   debugStartup("starting web service")
   if (process.env.CAPLAYGROUND_DESKTOP_URL) {
     return process.env.CAPLAYGROUND_DESKTOP_URL
   }
 
-  const port = await getOpenPort()
+  let port
+  try {
+    port = await getOpenPort(preferredPort)
+  } catch (error) {
+    if (preferredPort) {
+      throw new Error("The local project-storage port is occupied. Close other CAPlayground instances and reopen the app. / 用于读取项目的本地端口被占用，请关闭其他 CAPlayground 实例后重试。", { cause: error })
+    }
+    throw error
+  }
   const url = `http://127.0.0.1:${port}`
 
   if (isDev) {
@@ -203,9 +216,23 @@ function installApplicationMenu() {
 
 async function createWindow() {
   debugStartup("creating main window")
-  appUrlPromise ??= startWebServer()
+  appUrlPromise ??= (async () => {
+    if (process.env.CAPLAYGROUND_DESKTOP_URL) return process.env.CAPLAYGROUND_DESKTOP_URL
+    const storage = resolveStorageOrigin(app.getPath("userData"))
+    const upstreamUrl = await startWebServer(storage.origin.mode === "http" ? storage.origin.port : undefined)
+    saveStorageOrigin(storage.configPath, storage.origin)
+    debugStartup(`storage origin selected; mode=${storage.origin.mode}${storage.origin.port ? `; port=${storage.origin.port}` : ""}; recovered=${storage.recovered}`)
+    if (storage.origin.mode === "app") {
+      if (!appProtocolInstalled) {
+        installAppProtocol({ protocol, net: electronNet, upstreamUrl })
+        appProtocolInstalled = true
+      }
+      return `${APP_ORIGIN}/`
+    }
+    return `${upstreamUrl}/`
+  })()
   const appUrl = await appUrlPromise
-  const appOrigin = new URL(appUrl).origin
+  const isInternalUrl = (url) => isAppUrl(appUrl) ? isAppUrl(url) : new URL(url).origin === new URL(appUrl).origin
 
   mainWindow = new BrowserWindow({
     width: 1440,
@@ -224,13 +251,13 @@ async function createWindow() {
   })
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith(appOrigin)) return { action: "allow" }
+    if (isInternalUrl(url)) return { action: "allow" }
     shell.openExternal(url)
     return { action: "deny" }
   })
 
   mainWindow.webContents.on("will-navigate", (event, url) => {
-    if (new URL(url).origin !== appOrigin) {
+    if (!isInternalUrl(url)) {
       event.preventDefault()
       shell.openExternal(url)
     }
@@ -242,7 +269,7 @@ async function createWindow() {
   })
 
   await mainWindow.loadURL(appUrl)
-  debugStartup("main window loaded")
+  debugStartup(`main window loaded; url=${mainWindow.webContents.getURL()}`)
 }
 
 const singleInstance = app.requestSingleInstanceLock()
@@ -274,6 +301,7 @@ if (!singleInstance) {
   }).catch((error) => {
     debugStartup(`startup failed: ${error?.stack || error}`)
     console.error(error)
+    dialog.showErrorBox("CAPlayground", error?.message || String(error))
     app.quit()
   })
 }
