@@ -56,7 +56,12 @@ for (const file of scanRoots.flatMap(filesIn)) {
   }
 }
 
-const byFile = Map.groupBy(findings, ({ file }) => file)
+const byFile = new Map()
+for (const finding of findings) {
+  const items = byFile.get(finding.file) ?? []
+  items.push(finding)
+  byFile.set(finding.file, items)
+}
 console.log(`Mapped legacy strings: ${mapped.size}`)
 console.log(`Unmapped user-facing literal candidates: ${findings.length}`)
 for (const [file, items] of [...byFile].sort((a, b) => b[1].length - a[1].length)) {
