@@ -8,6 +8,7 @@ import UnofficialDomainBanner from "@/components/unofficial-domain-banner"
 import { PostHogProvider } from "@/components/posthog-provider"
 import { I18nProvider } from "@/components/i18n-provider"
 import { getServerLocale } from "@/lib/i18n/server"
+import { McpBridge } from "@/components/mcp-bridge"
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -63,6 +64,7 @@ export default async function RootLayout({
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               <UnofficialDomainBanner />
               <Favicon />
+              <McpBridge />
               {children}
             </ThemeProvider>
           </PostHogProvider>

@@ -4,9 +4,11 @@
   "private": true,
   "author": "CAPlayground contributors",
   "description": "CAPlayground desktop client for Windows and macOS",
-  "main": "src/main.cjs",
+  "main": "src/launcher.cjs",
   "scripts": {
-    "dev": "electron src/main.cjs --dev",
+    "dev": "electron src/launcher.cjs --dev",
+    "mcp": "electron src/launcher.cjs --mcp",
+    "test:mcp": "node scripts/mcp-smoke.cjs",
     "build:web": "npm --prefix ../web run build",
     "prepare:standalone": "node scripts/prepare-standalone.cjs",
     "dist:win": "npm run build:web && npm run prepare:standalone && electron-builder --win nsis portable --x64",
@@ -71,5 +73,9 @@
       ],
       "identity": null
     }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
+    "zod": "^4.4.3"
   }
 }

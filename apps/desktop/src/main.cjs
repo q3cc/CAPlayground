@@ -1,15 +1,17 @@
-const { app, BrowserWindow, Menu, shell } = require("electron")
+const { app, BrowserWindow, Menu, shell, ipcMain, clipboard, dialog } = require("electron")
 const { spawn } = require("node:child_process")
 const fs = require("node:fs")
 const http = require("node:http")
 const net = require("node:net")
 const path = require("node:path")
+const { startMcpBridge } = require("./mcp-bridge.cjs")
 
 const isDev = process.argv.includes("--dev") || !app.isPackaged
 let mainWindow = null
 let webServer = null
 let quitting = false
 let appUrlPromise = null
+let mcpBridge = null
 
 function debugStartup(message) {
   if (process.env.CAPLAYGROUND_DEBUG_STARTUP !== "1") return
@@ -166,6 +168,35 @@ function installApplicationMenu() {
         { role: "close", label: label("Close", "关闭") },
       ],
     },
+    {
+      label: label("AI Control", "AI 控制"),
+      submenu: [
+        {
+          label: label("Copy MCP Configuration", "复制 MCP 配置"),
+          click: () => {
+            const args = app.isPackaged ? ["--mcp"] : [path.join(__dirname, "launcher.cjs"), "--mcp"]
+            const config = {
+              mcpServers: {
+                caplayground: {
+                  command: process.execPath,
+                  args,
+                },
+              },
+            }
+            clipboard.writeText(JSON.stringify(config, null, 2))
+            dialog.showMessageBox(mainWindow, {
+              type: "info",
+              title: "CAPlayground MCP",
+              message: label("MCP configuration copied", "MCP 配置已复制"),
+              detail: label(
+                "Paste it into your AI client's MCP configuration. Keep CAPlayground open while the AI is connected.",
+                "请粘贴到 AI 客户端的 MCP 配置中，并在 AI 连接期间保持 CAPlayground 运行。",
+              ),
+            })
+          },
+        },
+      ],
+    },
   ]
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
@@ -188,6 +219,7 @@ async function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      preload: path.join(__dirname, "preload.cjs"),
     },
   })
 
@@ -233,6 +265,7 @@ if (!singleInstance) {
       copyright: "CAPlayground contributors",
     })
     installApplicationMenu()
+    mcpBridge = startMcpBridge({ app, ipcMain, getMainWindow: () => mainWindow })
     await createWindow()
 
     app.on("activate", () => {
@@ -247,6 +280,8 @@ if (!singleInstance) {
 
 app.on("before-quit", () => {
   quitting = true
+  mcpBridge?.close()
+  mcpBridge = null
   if (webServer && !webServer.killed) webServer.kill()
 })
 

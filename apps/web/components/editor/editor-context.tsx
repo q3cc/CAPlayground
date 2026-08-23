@@ -20,6 +20,8 @@ import { sanitizeFilename, dataURLToBlob, normalize, uploadFrameAssets, cleanupO
 import { CAEmitterCell } from "./emitter/emitter";
 import { assetCache } from "@/hooks/use-asset-url";
 import { computeAbsoluteLTFor, getParentAbsContextFor, cssToPosition } from "./canvas-preview/utils/coordinates";
+import { MCP_NOT_HANDLED, registerMcpCommandHandler } from "@/lib/mcp-command-bus";
+import { applyDocumentPatch, type DocumentPatchOperation } from "@/lib/mcp-document-patch";
 
 type CADoc = {
   layers: AnyLayer[];
@@ -42,6 +44,40 @@ export type ProjectDocument = {
     wallpaper: CADoc;
   };
 };
+
+function assertProjectDocument(value: unknown): asserts value is ProjectDocument {
+  const candidate = value as ProjectDocument | null;
+  if (!candidate || typeof candidate !== 'object' || !candidate.meta || !candidate.docs) {
+    throw new Error('Invalid editor document: meta and docs are required.');
+  }
+  if (!['background', 'floating', 'wallpaper'].includes(candidate.activeCA)) {
+    throw new Error('Invalid editor document: activeCA is not supported.');
+  }
+  for (const key of ['background', 'floating', 'wallpaper'] as const) {
+    if (!candidate.docs[key] || !Array.isArray(candidate.docs[key].layers) || !Array.isArray(candidate.docs[key].states)) {
+      throw new Error(`Invalid editor document: docs.${key} requires layers and states arrays.`);
+    }
+  }
+}
+
+function appendLayerToParent(layers: AnyLayer[], parentId: string, layer: AnyLayer): { found: boolean; layers: AnyLayer[] } {
+  let found = false;
+  const next = layers.map((candidate) => {
+    if (candidate.id === parentId) {
+      found = true;
+      return { ...candidate, children: [...(candidate.children || []), layer] } as AnyLayer;
+    }
+    if (candidate.children?.length) {
+      const nested = appendLayerToParent(candidate.children, parentId, layer);
+      if (nested.found) {
+        found = true;
+        return { ...candidate, children: nested.layers } as AnyLayer;
+      }
+    }
+    return candidate;
+  });
+  return { found, layers: next };
+}
 
 export type EditorContextValue = {
   projectId: string;
@@ -1856,6 +1892,118 @@ export function EditorProvider({
     setAnimatedLayers,
     hiddenLayerIds,
     toggleLayerVisibility,
+  ]);
+
+  useEffect(() => registerMcpCommandHandler(async (command, args) => {
+    if (command === 'editor.get_document') {
+      if (!doc) throw new Error('The editor document is still loading.');
+      return { projectId, document: structuredClone(doc), savingStatus, lastSavedAt };
+    }
+
+    if (command === 'editor.replace_document') {
+      if (!doc) throw new Error('The editor document is still loading.');
+      assertProjectDocument(args.document);
+      const replacement = structuredClone(args.document);
+      if (replacement.meta.id !== projectId) throw new Error('The replacement document must keep the current project id.');
+      pushHistory(doc);
+      setDoc(replacement);
+      return { projectId, replaced: true };
+    }
+
+    if (command === 'editor.patch_document') {
+      if (!doc) throw new Error('The editor document is still loading.');
+      const operations = args.operations as DocumentPatchOperation[];
+      if (!Array.isArray(operations) || operations.length === 0) throw new Error('At least one patch operation is required.');
+      const patched = applyDocumentPatch(doc, operations);
+      assertProjectDocument(patched);
+      if (patched.meta.id !== projectId) throw new Error('Document patches cannot change the current project id.');
+      pushHistory(doc);
+      setDoc(patched);
+      return { projectId, patched: true, operationCount: operations.length };
+    }
+
+    if (command === 'editor.save') {
+      if (!doc) throw new Error('The editor document is still loading.');
+      await flushPersist();
+      return { projectId, saved: true, savedAt: Date.now() };
+    }
+
+    if (command !== 'editor.action') return MCP_NOT_HANDLED;
+    if (!doc) throw new Error('The editor document is still loading.');
+    const action = String(args.action || '');
+    const payload = (args.payload || {}) as Record<string, any>;
+
+    switch (action) {
+      case 'set_active_view': {
+        const view = String(payload.view || '');
+        if (!['background', 'floating', 'wallpaper'].includes(view)) throw new Error(`Unsupported view: ${view}`);
+        value.setActiveCA(view as ProjectDocument['activeCA']);
+        break;
+      }
+      case 'select_layer':
+        selectLayer(payload.layerId ? String(payload.layerId) : null);
+        break;
+      case 'add_layer': {
+        const layer = structuredClone(payload.layer) as AnyLayer;
+        if (!layer || typeof layer !== 'object') throw new Error('payload.layer is required.');
+        layer.id ||= genId();
+        layer.name ||= getNextLayerName(doc.docs[doc.activeCA].layers, 'Layer');
+        if (!layer.type || !layer.position || !layer.size) throw new Error('A layer requires type, position, and size.');
+        const view = (payload.view || doc.activeCA) as ProjectDocument['activeCA'];
+        if (!['background', 'floating', 'wallpaper'].includes(view)) throw new Error(`Unsupported view: ${view}`);
+        setDoc((previous) => {
+          if (!previous) return previous;
+          const current = previous.docs[view];
+          if (containsId(current.layers, layer.id)) throw new Error(`Layer id already exists: ${layer.id}`);
+          let layers = [...current.layers, layer];
+          if (payload.parentId) {
+            const nested = appendLayerToParent(current.layers, String(payload.parentId), layer);
+            if (!nested.found) throw new Error(`Parent layer not found: ${payload.parentId}`);
+            layers = nested.layers;
+          }
+          pushHistory(previous);
+          return { ...previous, docs: { ...previous.docs, [view]: { ...current, layers, selectedId: layer.id } } };
+        });
+        break;
+      }
+      case 'update_layer':
+        updateLayer(String(payload.layerId || ''), payload.patch || {});
+        break;
+      case 'delete_layer':
+        deleteLayer(String(payload.layerId || ''));
+        break;
+      case 'duplicate_layer':
+        duplicateLayer(payload.layerId ? String(payload.layerId) : undefined);
+        break;
+      case 'move_layer':
+        moveLayer(String(payload.sourceId || ''), payload.beforeId == null ? null : String(payload.beforeId), payload.position || 'before');
+        break;
+      case 'set_active_state':
+        setActiveState(String(payload.state || 'Base State') as NonNullable<CADoc['activeState']>);
+        break;
+      case 'set_state_override':
+        updateStateOverride(String(payload.targetId || ''), payload.keyPath, Number(payload.value));
+        break;
+      case 'toggle_layer_visibility':
+        toggleLayerVisibility(String(payload.layerId || ''));
+        break;
+      case 'undo':
+        undo();
+        break;
+      case 'redo':
+        redo();
+        break;
+      case 'cleanup_assets':
+        await cleanupAssets();
+        break;
+      default:
+        throw new Error(`Unsupported editor action: ${action}`);
+    }
+    return { projectId, action, completed: true };
+  }), [
+    cleanupAssets, deleteLayer, doc, duplicateLayer, flushPersist, lastSavedAt, moveLayer,
+    projectId, pushHistory, redo, savingStatus, selectLayer, setActiveState, toggleLayerVisibility,
+    undo, updateLayer, updateStateOverride, value,
   ]);
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;

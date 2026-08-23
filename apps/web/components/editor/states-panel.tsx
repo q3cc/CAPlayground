@@ -9,8 +9,24 @@ import { ArrowRight, Eye, Settings } from "lucide-react";
 import { useEditor } from "./editor-context";
 import { useState, useMemo } from "react";
 import { AnyLayer } from "@/lib/ca/types";
+import { useI18n } from "@/components/i18n-provider";
+import type { MessageKey } from "@/lib/i18n/config";
+
+const STATE_MESSAGE_KEYS: Partial<Record<string, MessageKey>> = {
+  "Base State": "editor.states.base",
+  Locked: "editor.states.locked",
+  Unlock: "editor.states.unlock",
+  Sleep: "editor.states.sleep",
+  "Locked Light": "editor.states.lockedLight",
+  "Unlock Light": "editor.states.unlockLight",
+  "Sleep Light": "editor.states.sleepLight",
+  "Locked Dark": "editor.states.lockedDark",
+  "Unlock Dark": "editor.states.unlockDark",
+  "Sleep Dark": "editor.states.sleepDark",
+};
 
 export function StatesPanel() {
+  const { t } = useI18n();
   const { doc, setDoc, setActiveState } = useEditor();
   const gyroEnabled = doc?.meta.gyroEnabled ?? false;
   const key = doc?.activeCA ?? 'floating';
@@ -20,6 +36,10 @@ export function StatesPanel() {
   const [viewAllOpen, setViewAllOpen] = useState(false);
 
   const allStates = useMemo(() => ['Base State', ...states], [states]);
+  const getStateLabel = (state: string) => {
+    const messageKey = STATE_MESSAGE_KEYS[state];
+    return messageKey ? t(messageKey) : state;
+  };
   
   const stateOverrides = current?.stateOverrides || {};
 
@@ -130,7 +150,7 @@ export function StatesPanel() {
                 <div className="flex flex-wrap gap-2">
                   {allStates.map(state => (
                     <Badge key={state} variant={state === active ? "default" : "secondary"}>
-                      {state}
+                      {getStateLabel(state)}
                     </Badge>
                   ))}
                 </div>
@@ -147,7 +167,7 @@ export function StatesPanel() {
                         <div className="space-y-2">
                           {Object.entries(stateData).map(([stateName, overrides]) => (
                             <div key={stateName} className="text-xs">
-                              <Badge variant="outline" className="mb-1">{stateName}</Badge>
+                              <Badge variant="outline" className="mb-1">{getStateLabel(stateName)}</Badge>
                               <div className="ml-2 space-y-1">
                                 {overrides.map((override, idx) => (
                                   <div key={idx} className="flex items-center gap-2 text-muted-foreground">
@@ -209,7 +229,7 @@ export function StatesPanel() {
               className={`w-full text-left px-2 py-2 flex items-center justify-between select-none ${active === 'Base State' ? 'bg-accent/30' : 'hover:bg-muted/50'}`}
               onClick={() => setActiveState('Base State')}
             >
-              <div className="truncate flex-1">Base State</div>
+              <div className="truncate flex-1">{getStateLabel('Base State')}</div>
             </button>
             {states.map((s) => (
               <button
@@ -218,7 +238,7 @@ export function StatesPanel() {
                 className={`w-full text-left px-2 py-2 flex items-center justify-between ${active === s ? 'bg-accent/30' : 'hover:bg-muted/50'}`}
                 onClick={() => setActiveState(s as any)}
               >
-                <div className="truncate flex-1">{s}</div>
+                <div className="truncate flex-1">{getStateLabel(s)}</div>
               </button>
             ))}
           </div>

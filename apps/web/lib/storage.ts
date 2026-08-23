@@ -177,7 +177,10 @@ async function opfs_listFiles(projectId: string, prefix?: string): Promise<Stora
 }
 
 async function opfs_deleteFile(projectId: string, path: string): Promise<void> {
-  const full = `${PROJECTS_DIR}/${projectId}/${path}`;
+  const meta = await opfs_getProject(projectId);
+  const nameFolder = `${(meta?.name || projectId)}.ca/`;
+  const rel = path.startsWith(nameFolder) ? path.slice(nameFolder.length) : path;
+  const full = `${PROJECTS_DIR}/${projectId}/${rel}`;
   await remove(full, { recursive: false });
 }
 

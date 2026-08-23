@@ -233,6 +233,16 @@ export const en = {
   "editor.onboarding.settingsTitle": "Settings",
   "editor.onboarding.settingsDescription": "Adjust the editor layout, controls, language, and shortcuts.",
   "editor.onboarding.docs": "Open Documentation",
+  "editor.states.base": "Base State",
+  "editor.states.locked": "Locked",
+  "editor.states.unlock": "Unlock",
+  "editor.states.sleep": "Sleep",
+  "editor.states.lockedLight": "Locked (Light)",
+  "editor.states.unlockLight": "Unlock (Light)",
+  "editor.states.sleepLight": "Sleep (Light)",
+  "editor.states.lockedDark": "Locked (Dark)",
+  "editor.states.unlockDark": "Unlock (Dark)",
+  "editor.states.sleepDark": "Sleep (Dark)",
 } as const
 
 export type MessageKey = keyof typeof en

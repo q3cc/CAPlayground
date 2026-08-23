@@ -98,6 +98,14 @@ npm run dist:mac
 
 This creates DMG and ZIP packages for Intel and Apple Silicon. macOS packages must be built on macOS. The `Desktop Builds` GitHub Actions workflow builds both Windows and macOS artifacts on their native runners and can also be started manually.
 
+## MCP: control the complete editor with AI
+
+The Windows and macOS clients include a local MCP server. Keep CAPlayground running, choose **AI Control → Copy MCP Configuration**, and paste the copied JSON into Codex, Claude Desktop, Cursor, VS Code, or another MCP host.
+
+The MCP server can manage projects and files, read or patch the complete editor document, control every layer type and view, edit states and overrides, manipulate animations, filters, particles, video frames and parallax settings, run undo/redo, and persist the result to CAML.
+
+The bridge only listens on `127.0.0.1` and creates a new random access token for every app launch. Destructive project and file operations are marked as destructive MCP tools.
+
 ## Contributing
 
 Read [CONTRIBUTING.md](.github/CONTRIBUTING.md)
